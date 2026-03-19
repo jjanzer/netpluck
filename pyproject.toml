@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netpluck"
+version = "0.9.0"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+	{name = "Jesse Janzer", email = "jjanzer@gmail.com"}
+]
+
+dependencies = [
+	"requests"
+]
+
+[project.optional-dependencies]
+# bucket handler adds support for things like backblaze
+bucket = [
+	"buckethandler>=0.9.0",
+]
+
+[project.scripts]
+netpluck = "netpluck.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jjanzer/netpluck"
