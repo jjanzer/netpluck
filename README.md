@@ -16,6 +16,7 @@ NetPluck provides a CLI tool via `netpluck` and the core python libraries.
 
 1. zip
 1. zip64
+1. tar
 
 ## Protocols Supported
 
