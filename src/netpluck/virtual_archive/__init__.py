@@ -1,2 +1,3 @@
 from .base import VirtualArchive
-from .zh import ZipHopper
+from .va_zip import VirtualArchiveZip
+from .va_tar import VirtualArchiveTar

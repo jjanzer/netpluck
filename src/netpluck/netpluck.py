@@ -4,7 +4,8 @@ import math
 import os
 from typing import List
 
-from netpluck.virtual_archive.zh import ZipHopper
+from netpluck.virtual_archive.va_zip import VirtualArchiveZip
+from netpluck.virtual_archive.va_tar import VirtualArchiveTar
 from netpluck.virtual_file import VirtualFile, VirtualFileHTTP, VirtualFileLocal
 from netpluck.virtual_archive.base import VirtualArchive
 
@@ -13,6 +14,7 @@ class ArchiveType(Enum):
 	The list of archive types NetPluck supports
 	'''
 	ZIP = 1
+	TAR = 2
 	UNKNOWN = 99
 
 class ProtocolType(Enum):
@@ -75,7 +77,10 @@ class NetPluck:
 		self.at = archive_type
 
 		# Finally let's instantiate the archive handler based on the archive type
-		self.ah = ZipHopper(self.vf)
+		if self.at == ArchiveType.ZIP:
+			self.ah = VirtualArchiveZip(self.vf)
+		elif self.at == ArchiveType.TAR:
+			self.ah = VirtualArchiveTar(self.vf)
 
 
 	# Private Methods
@@ -94,13 +99,20 @@ class NetPluck:
 	def _guess_archive_type(self) -> ArchiveType:
 		if self.path.endswith(".zip"):
 			return ArchiveType.ZIP
+		elif self.path.endswith(".tar"):
+			return ArchiveType.TAR
 		else:
 			# Try fetching the magic bytes of the file to determine the type
 			magic_bytes = self.vf[0:4]
 			if magic_bytes == b'PK\x03\x04':
 				return ArchiveType.ZIP
-			else:
-				raise Exception("Could not determine archive type")
+
+			# Try other types
+			if self.vf[257:262] == b"ustar":
+				return ArchiveType.TAR
+
+			raise Exception("Could not determine archive type")
+
 
 
 	# Public Methods
