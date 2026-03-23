@@ -17,7 +17,7 @@ class VirtualArchive:
 		Return a list of files in the archive
 		'''
 		raise NotImplementedError()
-	def extract(self,internal_path:str, output_dir:str, flatten:bool=False, replace:bool=True) -> str:
+	def extract(self,internal_path:str, output_dir:str, flatten:bool=False, replace:bool=True, normalize_path:bool=True) -> str:
 		'''
 		Extract a file from the zip to the specified output directory
 
@@ -27,6 +27,7 @@ class VirtualArchive:
 			flatten: is a boolean that indicates whether to flatten the output file structure, if true the output file will be output/car.png instead of output/foo/bar/car.png
 				flatten is useful if you just want the files and don't care about the directory structure within the archive
 			replace: if false, and the output file exists, skips it
+			normalize_path: if true, this will cleanup and convert ..,./,// and slashes to the os specific separator
 
 		Returns:
 			The path to the extracted file
@@ -38,6 +39,9 @@ class VirtualArchive:
 			output_path = os.path.join(output_dir, os.path.basename(internal_path))
 		else:
 			output_path = os.path.join(output_dir, internal_path)
+
+		if normalize_path:
+			output_path = os.path.normpath(output_path)
 
 		if replace == False and os.path.exists(output_path):
 			return output_path
