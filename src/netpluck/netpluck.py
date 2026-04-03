@@ -24,6 +24,7 @@ class ProtocolType(Enum):
 	LOCAL = 1 # Local file system
 	HTTP = 2 # Both HTTP AND HTTPS are covered by this
 	B2 = 3 # Backblaze B2
+	S3 = 4 # Amazon S3
 	UNKNOWN = 99
 
 
@@ -50,19 +51,18 @@ class NetPluck:
 
 		self.protocol = self._guess_protocol(path)
 
-		if self.protocol == ProtocolType.B2:
-			# B2 support is only available if you install buckethandler
+		if self.protocol == ProtocolType.B2 or self.protocol == ProtocolType.S3:
+			# S3 and B2 support is only available if you install buckethandler
 
 			try:
-				from netpluck.virtual_file.backblaze import VirtualFileBackblaze
-				from buckethandler import BackblazeB2Handler
+				from netpluck.virtual_file.buckethandler import VirtualFileBucketHandler
+				from buckethandler import BucketHandler, BucketHandlerType
 			except ImportError:
 				raise ImportError("To use backblaze b2 support you need to install the bucket handler package, you can do this via: pip install netpluck[bucket]")
 
-			protocol_prefix_b2 = "b2://"
-			path = path[len(protocol_prefix_b2):]
-			handler = BackblazeB2Handler(config)
-			self.vf = VirtualFileBackblaze(handler, path)
+			handler = BucketHandler(config,path=path)
+			path = handler.strip_protocol_from_path(path)
+			self.vf = VirtualFileBucketHandler(handler, path)
 		elif self.protocol == ProtocolType.HTTP:
 			self.vf = VirtualFileHTTP(path)
 		elif self.protocol == ProtocolType.LOCAL:
@@ -86,11 +86,14 @@ class NetPluck:
 	# Private Methods
 
 	def _guess_protocol(self,path) -> ProtocolType:
+		protocol_prefix_s3 = "s3://"
 		protocol_prefix_b2 = "b2://"
 		protocol_prefix_http = "http://"
 		protocol_prefix_https = "https://"
 		if path.startswith(protocol_prefix_b2):
 			return ProtocolType.B2
+		elif path.startswith(protocol_prefix_s3):
+			return ProtocolType.S3
 		elif path.startswith(protocol_prefix_http) or path.startswith(protocol_prefix_https):
 			return ProtocolType.HTTP
 		else:

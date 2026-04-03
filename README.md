@@ -19,7 +19,7 @@ To get access to local and http/https files you can run:
 pip install netpluck
 ```
 
-If you want access to buckets like backblaze, you should install the optional dependency:
+If you want access to buckets like Backblaze b2 or AWS S3, you must install the optional dependency:
 ```
 pip install buckethandler
 ```
@@ -41,6 +41,7 @@ pip install -e .
 1. Local Files
 1. Remote Files over HTTP or HTTPS that support range
 1. Backblaze B2
+1. AWS S3
 
 ## Usage
 
