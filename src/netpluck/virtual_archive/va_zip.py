@@ -128,8 +128,14 @@ def read_zip_central_directory_file_header(bytes):
 	offset = int.from_bytes(bytes[42:46], "little")
 	header_size = 46 + filename_length + extra_field_length + file_comment_length
 
+	is_utf8 = (flags & 0x0800) != 0
+
 	# Read the filename, extra field, and file comment
-	filename = bytes[46:46 + filename_length].decode("utf-8")
+	filename = bytes[46:46 + filename_length]
+	if is_utf8:
+		filename = filename.decode("utf-8")
+	else:
+		filename = filename.decode("cp437")
 	extra_field = bytes[46 + filename_length:46 + filename_length + extra_field_length]
 	file_comment = bytes[46 + filename_length + extra_field_length:46 + filename_length + extra_field_length + file_comment_length]
 
